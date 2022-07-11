@@ -1,181 +1,161 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Threading;
 
 namespace GameTestOne
 {
+
+    public class Snake
+    {
+
+        public class Part
+        {
+            public int x, y, oldx , oldy;
+            
+        }
+        public int HeadX, HeadY;
+        public List<Part> parts = new List<Part>();
+    }
     class Program
     {
-       public enum move { up, down, left, right };
-       public move dir = move.up;
+
+        public static bool isStarted;
+        public static int width =20, height =20;
+        public static Snake snake;
+       public enum move { up, down, left, right, stop }
+        public static move dir = move.stop;
+
+
+
+        public static void Init()
+        {
+            snake = new Snake() {HeadX = width/2, HeadY = height/2 , parts  = new List<Snake.Part>() { new Snake.Part() { x = (width / 2) - 1, y = height / 2 , oldx = (width/2)- 1, oldy = height/2} } };
+            Console.CursorVisible = false;
+            isStarted = true;
+            dir = move.stop;
+        }
+
+    
+       public static void Draw()
+            {
+                Console.Clear();
+                for (int i = 0; i< height; i++)
+                {
+                    for(int j = 0; j < width; j++)
+                     {
+                        if (i == 0 || i == height -1)
+                        {
+                            Console.Write("|");
+                            continue;
+                        }
+                        if (j == 0 || j ==width-1 )
+                        {
+                            Console.Write("|");
+                        
+                    }
+                        else
+                        {
+                            Console.Write(" ");
+                       
+                    }
+                     }
+                    Console.Write("\n");
+                }
+
+            Console.SetCursorPosition(snake.HeadX, snake.HeadY);
+            Console.Write("&");
+            for(int i = 0; i < snake.parts.Count; i++ )
+            {
+                Console.SetCursorPosition(snake.parts[i].x, snake.parts[i].y);
+                Console.Write("8");
+            }
+            }
+
+
+        public static void Input()
+        {
+            if(Console.KeyAvailable)
+            {
+                var key = Console.ReadKey();
+                switch (key.Key)
+                { 
+                    case ConsoleKey.UpArrow:
+                        dir = move.up;
+                        break;
+                  case ConsoleKey.DownArrow:
+                        dir = move.down;
+                        break;
+                    case ConsoleKey.LeftArrow:
+                        dir = move.left;
+                        break;
+                    case ConsoleKey.RightArrow:
+                        dir = move.right;
+                        break;
+                }
+                   
+            }      
+        }
+         
+
+        public static void Logic()
+        {
+            int oldX = snake.HeadX, oldY = snake.HeadY;
+            if( dir == move.up && dir != move.down)
+            {
+                snake.HeadY--;
+                
+            }
+            if (dir != move.up && dir == move.down)
+            {
+                snake.HeadY++;
+                
+            }
+            if (dir == move.left && dir != move.right)
+            {
+                snake.HeadX--;
+                
+            }
+            if (dir != move.left && dir == move.right)
+            {
+                snake.HeadX++;
+                
+            }
+            if (snake.HeadX == width || snake.HeadX == 0 || snake.HeadY == 0 || snake.HeadY == height-1)
+            {
+                isStarted = false;
+            }
+            if(dir != move.stop)
+            {
+                for(int i = 0; i < snake.parts.Count; i++ )
+                {
+                    if (i== 0) { snake.parts[i].x = oldX; snake.parts[i].y = oldY; continue; };
+                    snake.parts[i].x = snake.parts[i - 1].x;
+                    snake.parts[i].y = snake.parts[i - 1].y;
+                    snake.parts[i].oldx = snake.parts[i].x;
+                    snake.parts[i].oldy = snake.parts[i].y;
+                }
+            }
+
+            
+        }
         static void Main(string[] args)
         {
-        
-            int origRow;
-            int origCol;
-             void WriteAt(string s, int x, int y)
+
+            Init();
+            while(isStarted)
             {
-                try
-                {
-                    Console.SetCursorPosition(origCol + x, origRow + y);
-                    Console.Write(s);
-                }
-                catch (ArgumentOutOfRangeException e)
-                {
-                    Console.Clear();
-                    Console.WriteLine(e.Message);
-                }
-            }
-
-            Console.Clear();
-
-            origRow = Console.CursorTop;
-            origCol = Console.CursorLeft;
+                Input();
+                Draw();
+                Logic();
+                Thread.Sleep(1000);    
+            }    
 
 
 
-            int x1 = 0;
-            int y1 = 0;
 
-            while (y1 < 16)
-            {
-                if (y1 == 0 || y1 == 15)
-                {
-                    WriteAt("+", x1, y1);
-                }
-                else
-                {
-                    WriteAt("|", x1, y1);
-                }
-                y1++;
-            }
-             x1 = 1;
-             y1 = 0;
+  
 
-            while (x1 < 61)
-            {
-                if ( x1 == 60)
-                {
-                    WriteAt("+", x1, y1);
-                }
-                else
-                {
-                    WriteAt("--", x1, y1);
-                }
-                x1++;
-            }
-             x1 = 60;
-             y1 = 1;
-
-            while (y1 < 16)
-            {
-                if ( y1 == 15)
-                {
-                    WriteAt("+", x1, y1);
-                }
-                else
-                {
-                    WriteAt("|", x1, y1);
-                }
-                y1++;
-            }
-            x1 = 1;
-            y1 = 15;
-
-            while (x1 < 59)
-            {
-                    WriteAt("--", x1, y1);
-
-                x1++;
-            }
-
-
-            void Draw()
-            {
-                int X = 0;
-                int Y = 0;
-               Console.SetCursorPosition(X, Y);
-                Console.Write("0");
-            }
-            Draw();
-            
-           void Input()
-            {
-                if(Console.KeyAvailable)
-                {
-                    var key = Console.ReadKey();
-                    switch (key.KeyChar)
-                    {
-                        case "W":
-                            dir = move.up;
-                        case "S":
-                            dir = move.down;
-                        case "A":
-                            dir = move.left;
-                        case "D":
-                            dir = move.right;
-
-                    }
-                }
-            }
-
-            void Logic()
-            {
-                if (dir == move.up)
-                {
-
-                }
-            }
-
-
-            /*    int[,] pic = new int[,]
-            {
-            {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, },
-            {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, },
-            {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, },
-            {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, },
-            {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, },
-            {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, },
-            {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, },
-            {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, },
-            {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, },
-            {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, },
-            {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, },
-            {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, },
-            {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, },
-            {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, },
-            {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, },
-            {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, },
-            };
-
-                  void PrintImage(int[,] image)
-            {
-                for (int i = 0; i < image.GetLength(0); i++)
-                {
-                    for (int j = 0; j < image.GetLength(1); j++)
-                    {
-                        // Console.Write($"{image[i, j]} ");
-                        if (image[i,j] == 0) Console.Write($" ");
-                        else Console.Write($"+");
-                    }
-                    Console.WriteLine();
-                }
-            }
-
-
-
-                PrintImage(pic);
-
-           */
-            WriteAt("All done!", 0, 20);
-            Console.WriteLine();
-
-            Console.WriteLine();
-
-            Console.Write("Press <Enter> to exit... ");
-            while (Console.ReadKey().Key != ConsoleKey.Enter) { }
+   
 
 
         }
